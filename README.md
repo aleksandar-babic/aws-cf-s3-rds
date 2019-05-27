@@ -1,5 +1,15 @@
 # Cloudformation template - SPA on S3 with Lambda + RDS as API
 
+## Available Parameters
+|Key|Type|Default|
+|--|--|--|
+| S3BucketName | String | - |
+| GitHubRepo | String | https://github.com/aleksandar-babic/vue-s3-demo |
+| CodeBuildProjectName | String | - |
+| CodeBuildComputeType | String | BUILD_GENERAL1_SMALL |
+| CodeBuildEnvImage | String | node:alpine |
+| CodeBuildTimeout | Number | 10 |
+| VueBaseApiUrl | String | https://jsonplaceholder.typicode.com |
 
 
 ## How to deploy this template
@@ -22,5 +32,4 @@ aws cloudformation deploy --template-file cf-s3-codebuild-lambda-rds.yml --capab
 CAPABILITY_NAMED_IAM --parameter-overrides S3BucketName=bucket-name-here \
 CodeBuildProjectName=codebuild-project-name-here --stack-name stack-name-here
 ```
-
 > Only prerequirement for this template is VPC with IGW

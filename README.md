@@ -1,4 +1,4 @@
-# Cloudformation template - SPA on S3 with Lambda + RDS as API
+# Cloudformation template - SPA on S3 with ApiGateway + Lambda + RDS as API
 
 ## Available Parameters
 |Key|Type|Default|
@@ -17,7 +17,8 @@
 
 ## Outputs
 |Key|Description|
-| S3BucketURL | URL for SPA hosted on S3 |
+|--|--|--|
+| S3BuckeURL | URL for SPA hosted on S3 |
 | S3BucketSecureURL | Secure URL for SPA hosted on S3 |
 | ApiGatewayInvokeURL | URL for API Gateway that will return RDS data |
 
@@ -42,4 +43,5 @@ aws cloudformation deploy --template-file cf-s3-codebuild-lambda-rds.yml --capab
 CAPABILITY_NAMED_IAM --parameter-overrides S3BucketName=bucket-name-here \
 CodeBuildProjectName=codebuild-project-name-here --stack-name stack-name-here
 ```
+- Run initial CodeBuild build (any commit will also trigger build)
 > Only prerequirement for this template is VPC with IGW

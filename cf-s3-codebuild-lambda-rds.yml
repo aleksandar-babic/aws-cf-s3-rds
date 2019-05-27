@@ -1,0 +1,145 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  S3BucketName:
+    Type: String
+    Description: Name of S3 Bucket that will be created
+  GitHubRepo:
+    Type: String
+    Default: https://github.com/aleksandar-babic/vue-s3-demo
+    Description: Github repository URL where SPA source code is located, default is https://github.com/aleksandar-babic/vue-s3-demo
+  CodeBuildProjectName:
+    Type: String
+    Description: Name of CodeBuild project
+  CodeBuildComputeType:
+    Type: String
+    Default: BUILD_GENERAL1_SMALL
+    Description: Compute type for CodeBuild, default is BUILD_GENERAL1_SMALL
+  CodeBuildEnvImage:
+    Type: String
+    Default: node:alpine
+    Description: Environment image that will run in CodeBuild, default is node:alpine
+  CodeBuildTimeout:
+    Type: Number
+    Default: 10
+    Description: Timeout in mintues for CodeBuild, default is 10
+  VueBaseApiUrl:
+    Type: String
+    Default: https://jsonplaceholder.typicode.com
+    Description: Base API Url for Vue App, default is https://jsonplaceholder.typicode.com
+
+Outputs:
+  S3BucketURL:
+    Value: !GetAtt 
+      - S3Bucket
+      - WebsiteURL
+    Description: URL for SPA hosted on S3
+  S3BucketSecureURL:
+    Value: !Join 
+      - ''
+      - - 'https://'
+        - !GetAtt 
+          - S3Bucket
+          - DomainName
+        - '/index.html'
+    Description: Name of S3 bucket to serve SPA
+
+Resources:
+  # S3 Bucket setup
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: PublicRead
+      BucketName: !Ref S3BucketName
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+    DeletionPolicy: Retain
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      PolicyDocument:
+        Id: S3policy
+        Version: 2012-10-17
+        Statement:
+          - Sid: PublicReadForGetBucketObjects
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Join 
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref S3Bucket
+                - /*
+      Bucket: !Ref S3Bucket
+
+  # Codebuild project setup
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub CodeBuildRole-${AWS::StackName}
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "codebuild.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: /service-role/
+      Policies:
+        -
+          PolicyName: "CodeBuildAccessPolicies"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource:
+                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*
+              - 
+                Effect: "Allow"
+                Action:
+                  - "s3:GetObject"
+                  - "s3:GetObjectVersion"
+                  - "s3:ListBucket"
+                  - "s3:ListObjects"
+                  - "s3:PutObject"
+                  - "s3:PutObjectAcl"
+                Resource: !Join 
+                  - ''
+                  - - 'arn:aws:s3:::'
+                    - !Ref S3Bucket
+                    - /*
+
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Ref CodeBuildProjectName
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Artifacts:
+        Type: no_artifacts
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: !Ref CodeBuildComputeType
+        Image: !Ref CodeBuildEnvImage
+        EnvironmentVariables:
+          -
+            Name: S3_BUCKET_NAME
+            Type: PLAINTEXT
+            Value: !Ref S3BucketName
+          -
+            Name: VUE_APP_API_URL
+            Type: PLAINTEXT
+            Value: !Ref VueBaseApiUrl
+      Source:
+        Location: !Ref GitHubRepo
+        Type: GITHUB
+      Triggers:
+        Webhook: true
+      TimeoutInMinutes: !Ref CodeBuildTimeout

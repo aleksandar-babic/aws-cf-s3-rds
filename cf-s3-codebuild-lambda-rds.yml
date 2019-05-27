@@ -1,8 +1,11 @@
 AWSTemplateFormatVersion: 2010-09-09
 Parameters:
+  # S3 Parameters
   S3BucketName:
     Type: String
     Description: Name of S3 Bucket that will be created
+
+  # CodeBuild Parameters
   GitHubRepo:
     Type: String
     Default: https://github.com/aleksandar-babic/vue-s3-demo
@@ -22,10 +25,30 @@ Parameters:
     Type: Number
     Default: 10
     Description: Timeout in mintues for CodeBuild, default is 10
-  VueBaseApiUrl:
+
+  # ApiGateway/Lambda Parameters
+  ApiGatewayStageName:
+    Type: "String"
+    Default: "v1"
+    Description: Name of Api Gateway stage, default is v1
+  LambdaFunctionName:
+    Type: "String"
+    Default: "fetch-data-function"
+    Description: Name of Lambda function, default is fetch-data-function
+  LambdaMemoryLimit:
+    Type: Number
+    Default: 128
+    MinValue: 128
+    MaxValue: 2048
+    Description: Memory usage limit for lambda function, default is 128
+  LambdaRuntime:
     Type: String
-    Default: https://jsonplaceholder.typicode.com
-    Description: Base API Url for Vue App, default is https://jsonplaceholder.typicode.com
+    Default: python2.7
+    Description: Runtime that will Lambda function run in, default is python2.7
+  LambdaTimeout:
+    Type: Number
+    Default: 10
+    Description: Timeout in mintues for Lambda, default is 10
 
 Outputs:
   S3BucketURL:
@@ -33,6 +56,7 @@ Outputs:
       - S3Bucket
       - WebsiteURL
     Description: URL for SPA hosted on S3
+
   S3BucketSecureURL:
     Value: !Join 
       - ''
@@ -42,6 +66,10 @@ Outputs:
           - DomainName
         - '/index.html'
     Description: Name of S3 bucket to serve SPA
+
+  ApiGatewayInvokeURL:
+    Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${ApiGatewayStageName}"
+    Description: URL for API Gateway that will return RDS data
 
 Resources:
   # S3 Bucket setup
@@ -54,6 +82,7 @@ Resources:
         IndexDocument: index.html
         ErrorDocument: index.html
     DeletionPolicy: Retain
+
   BucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -116,14 +145,14 @@ Resources:
                   - - 'arn:aws:s3:::'
                     - !Ref S3Bucket
                     - /*
-
+                    
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: !Ref CodeBuildProjectName
       ServiceRole: !GetAtt CodeBuildServiceRole.Arn
       Artifacts:
-        Type: no_artifacts
+        Type: NO_ARTIFACTS
       Environment:
         Type: LINUX_CONTAINER
         ComputeType: !Ref CodeBuildComputeType
@@ -136,10 +165,102 @@ Resources:
           -
             Name: VUE_APP_API_URL
             Type: PLAINTEXT
-            Value: !Ref VueBaseApiUrl
+            Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${ApiGatewayStageName}"
       Source:
         Location: !Ref GitHubRepo
         Type: GITHUB
       Triggers:
         Webhook: true
       TimeoutInMinutes: !Ref CodeBuildTimeout
+  
+  # ApiGateway/Lambda setup
+  ApiGateway:
+    Type: "AWS::ApiGateway::RestApi"
+    Properties:
+      Name: "rds-lambda-api"
+      Description: "API that will have method to return RDS data"
+
+  ApiGatewayMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "NONE"
+      HttpMethod: "GET"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS_PROXY"
+        Uri: !Sub
+          - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations"
+          - lambdaArn: !GetAtt "LambdaFunction.Arn"
+      ResourceId: !GetAtt "ApiGateway.RootResourceId"
+      RestApiId: !Ref "ApiGateway"
+
+  ApiGatewayDeployment:
+    Type: "AWS::ApiGateway::Deployment"
+    DependsOn:
+      - "ApiGatewayMethod"
+    Properties:
+      RestApiId: !Ref "ApiGateway"
+      StageName: !Ref "ApiGatewayStageName"
+
+  LambdaFunction:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code:
+        ZipFile: |
+          def handler(event,context):
+            return {
+              'body': '[{"id": 1, "title": "Todo 1"}, {"id": 2, "title": "Todo 2"}]',
+              'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'OPTIONS,GET'
+              },
+              'statusCode': 200
+            }
+      Description: "Function that will fetch RDS data and return as JSON"
+      FunctionName: !Ref "LambdaFunctionName"
+      Handler: "index.handler"
+      MemorySize: !Ref LambdaMemoryLimit
+      Role: !GetAtt "LambdaIAMRole.Arn"
+      Runtime: !Ref LambdaRuntime
+      Timeout: !Ref LambdaTimeout
+
+  LambdaApiGatewayInvoke:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !GetAtt "LambdaFunction.Arn"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/"
+
+  LambdaIAMRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "sts:AssumeRole"
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+      Policies:
+        - PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Effect: "Allow"
+                Resource:
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${LambdaFunctionName}:*"
+          PolicyName: "lambda"
+
+  LambdaLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${LambdaFunctionName}"
+      RetentionInDays: 90

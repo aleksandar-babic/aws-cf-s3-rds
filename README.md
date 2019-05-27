@@ -9,7 +9,17 @@
 | CodeBuildComputeType | String | BUILD_GENERAL1_SMALL |
 | CodeBuildEnvImage | String | node:alpine |
 | CodeBuildTimeout | Number | 10 |
-| VueBaseApiUrl | String | https://jsonplaceholder.typicode.com |
+| ApiGatewayStageName | String | - |
+| LambdaFunctionName | String | fetch-data-function |
+| LambdaMemoryLimit | Number | 128 |
+| LambdaRuntime | String | python2.7 |
+| LambdaTimeout | Number | 10 |
+
+## Outputs
+|Key|Description|
+| S3BucketURL | URL for SPA hosted on S3 |
+| S3BucketSecureURL | Secure URL for SPA hosted on S3 |
+| ApiGatewayInvokeURL | URL for API Gateway that will return RDS data |
 
 
 ## How to deploy this template

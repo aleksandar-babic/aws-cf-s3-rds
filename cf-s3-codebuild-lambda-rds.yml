@@ -65,7 +65,7 @@ Outputs:
           - S3Bucket
           - DomainName
         - '/index.html'
-    Description: Name of S3 bucket to serve SPA
+    Description: Secure URL for SPA hosted on S3
 
   ApiGatewayInvokeURL:
     Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${ApiGatewayStageName}"

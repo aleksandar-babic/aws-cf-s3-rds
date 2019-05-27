@@ -9,7 +9,7 @@
 | CodeBuildComputeType | String | BUILD_GENERAL1_SMALL |
 | CodeBuildEnvImage | String | node:alpine |
 | CodeBuildTimeout | Number | 10 |
-| ApiGatewayStageName | String | - |
+| ApiGatewayStageName | String | v1 |
 | LambdaFunctionName | String | fetch-data-function |
 | LambdaMemoryLimit | Number | 128 |
 | LambdaRuntime | String | python2.7 |

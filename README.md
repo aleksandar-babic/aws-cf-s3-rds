@@ -19,9 +19,9 @@
 
 |Key|Description|
 |--|--|
-| S3BuckeURL | URL for SPA hosted on S3 |
+| S3BucketURL | URL for SPA hosted on S3 |
 | S3BucketSecureURL | Secure URL for SPA hosted on S3 |
-| ApiGatewayInvokeURL | URL for API Gateway that will return RDS data |
+| ApiGatewayInvokeURL | URL for API Gateway resource that will return RDS data |
 
 
 ## How to deploy this template

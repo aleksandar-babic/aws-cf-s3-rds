@@ -1,5 +1,7 @@
 # Cloudformation template - SPA on S3 with Lambda + RDS as API
 
+
+
 ## How to deploy this template
 - Clone this repo
 ```bash
@@ -20,3 +22,5 @@ aws cloudformation deploy --template-file cf-s3-codebuild-lambda-rds.yml --capab
 CAPABILITY_NAMED_IAM --parameter-overrides S3BucketName=bucket-name-here \
 CodeBuildProjectName=codebuild-project-name-here --stack-name stack-name-here
 ```
+
+> Only prerequirement for this template is VPC with IGW

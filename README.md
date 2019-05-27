@@ -16,8 +16,9 @@
 | LambdaTimeout | Number | 10 |
 
 ## Outputs
+
 |Key|Description|
-|--|--|--|
+|--|--|
 | S3BuckeURL | URL for SPA hosted on S3 |
 | S3BucketSecureURL | Secure URL for SPA hosted on S3 |
 | ApiGatewayInvokeURL | URL for API Gateway that will return RDS data |

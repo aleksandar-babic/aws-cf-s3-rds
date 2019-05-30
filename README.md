@@ -14,6 +14,9 @@
 | LambdaMemoryLimit | Number | 128 |
 | LambdaRuntime | String | python2.7 |
 | LambdaTimeout | Number | 10 |
+| LambdaSubnets | List<AWS::EC2::Subnet::Id> | 10 |
+| LambdaS3Bucket | String | rds-lambda-test-agt |
+| LambdaS3Key | String | fetch-data-fn-deployment.zip |
 | VpcId | AWS::EC2::VPC::Id | - |
 | DBName | String | AGTtest |
 | DBUser | String | - |
@@ -34,7 +37,7 @@
 | S3BucketURL | URL for SPA hosted on S3 |
 | S3BucketSecureURL | Secure URL for SPA hosted on S3 |
 | ApiGatewayInvokeURL | URL for API Gateway resource that will return RDS data |
-| RDSHostname | RDS DB Address and port |
+| RDSHostname | RDS DB internal hostname and port |
 
 
 ## How to deploy this template

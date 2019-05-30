@@ -1,5 +1,20 @@
 # Cloudformation template - SPA on S3 with ApiGateway + Lambda + RDS as API
 
+## Working example
+
+Below are example (they are all working, check them out!) Outputs from this template:
+
+- S3BucketURL: http://agt-s3-vue.s3-website.eu-central-1.amazonaws.com
+- S3BucketSecureURL: https://agt-s3-vue.s3.amazonaws.com/index.html
+- ApiGatewayInvokeURL: https://z4tkeel9nk.execute-api.eu-central-1.amazonaws.com/v1
+- RDSHostname: ar1xhfp6ybmx6j9.cush8cosudbc.eu-central-1.rds.amazonaws.com:3306/AGTtest
+
+Explanation:
+
+- `S3BucketURL` and `S3BucketSecureURL` represent URLs(http and https) to VueJS App served from S3.
+- `ApiGatewayInvokeURL` represents URL to Api Gateway Method that will Execute Python Lambda which fetches data from RDS.
+- `RDSHostname` represents connection string for RDS (RDS is not publicly available).
+
 ## Available Parameters
 |Key|Type|Default|
 |--|--|--|
@@ -25,7 +40,7 @@
 | DBEngine | String | mysql |
 | DBEngineVersion | String | 5.6.40 |
 | RDSParamGroupFamily | String | MySQL5.6 |
-| RDSSGCidr | String | - |
+| RDSSGCidr | String | 0.0.0.0/0 |
 
 ## Outputs
 
@@ -55,6 +70,10 @@
 | RDSSecurityGroup	 | AWS::EC2::SecurityGroup	 |
 | S3Bucket	 |AWS::S3::Bucket	|
 
+## AWS Cloudformation Diagram
+
+![aws-cf-diagram](https://i.gyazo.com/eea0b51255f3779f222118e0493a6e5b.png)
+
 ## How to deploy this template
 - Clone this repo
 ```bash
@@ -81,4 +100,5 @@ CodeBuildProjectName=codebuild-project-name-here DBUser=db-user-here DBPassword=
 
 > Only prerequirement for this template is VPC with IGW
 
-> This example uses hardcoded Lambda function written in Python that connects to RDS and fetches todos from db table.
+> This example uses hardcoded Lambda function written in Python that connects to RDS and fetches todos from the DB table.
+> Deployment package of Python Lambda function can be downloaded [here](https://s3.eu-central-1.amazonaws.com/rds-lambda-test-agt/fetch-data-fn-deployment.zip).

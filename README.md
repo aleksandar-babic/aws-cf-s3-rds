@@ -14,6 +14,18 @@
 | LambdaMemoryLimit | Number | 128 |
 | LambdaRuntime | String | python2.7 |
 | LambdaTimeout | Number | 10 |
+| VpcId | AWS::EC2::VPC::Id | - |
+| DBName | String | AGTtest |
+| DBUser | String | - |
+| DBPassword | String | - |
+| DBInstanceClass | String | db.t2.small |
+| DBEngine | String | mysql |
+| DBEngineVersion | String | 5.6.40 |
+| RDSParamGroupFamily | String | MySQL5.6 |
+| RDSSGCidr | String | - |
+
+
+
 
 ## Outputs
 
@@ -22,6 +34,7 @@
 | S3BucketURL | URL for SPA hosted on S3 |
 | S3BucketSecureURL | Secure URL for SPA hosted on S3 |
 | ApiGatewayInvokeURL | URL for API Gateway resource that will return RDS data |
+| RDSHostname | RDS DB Address and port |
 
 
 ## How to deploy this template
@@ -42,7 +55,10 @@ aws codebuild import-source-credentials --cli-input-json file://source-credentia
 ```bash
 aws cloudformation deploy --template-file cf-s3-codebuild-lambda-rds.yml --capabilities \
 CAPABILITY_NAMED_IAM --parameter-overrides S3BucketName=bucket-name-here \
-CodeBuildProjectName=codebuild-project-name-here --stack-name stack-name-here
+CodeBuildProjectName=codebuild-project-name-here DBUser=db-user-here DBPassword=db-password-here VpcId=vpc-id-here RDSSGCidr=cidr-here --stack-name stack-name-here
 ```
+- Or apply template from AWS Console
+
 - Run initial CodeBuild build (any commit will also trigger build)
+
 > Only prerequirement for this template is VPC with IGW

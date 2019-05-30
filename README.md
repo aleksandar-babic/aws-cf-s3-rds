@@ -38,7 +38,7 @@
 
 # Resources created by this template
 
-|Name|Type|
+|Logical Name|Type|
 |--|--|
 | ApiGateway | AWS::ApiGateway::RestApi	 |
 | ApiGatewayDeployment	 | AWS::ApiGateway::Deployment	 |
@@ -80,3 +80,5 @@ CodeBuildProjectName=codebuild-project-name-here DBUser=db-user-here DBPassword=
 - Run initial CodeBuild build (any commit will also trigger build)
 
 > Only prerequirement for this template is VPC with IGW
+
+> This example uses hardcoded Lambda function written in Python that connects to RDS and fetches todos from db table.

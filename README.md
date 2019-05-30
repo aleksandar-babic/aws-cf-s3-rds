@@ -15,6 +15,10 @@ Explanation:
 - `ApiGatewayInvokeURL` represents URL to Api Gateway Method that will Execute Python Lambda which fetches data from RDS.
 - `RDSHostname` represents connection string for RDS (RDS is not publicly available).
 
+## AWS Cloudformation Diagram
+
+![aws-cf-diagram](https://i.gyazo.com/eea0b51255f3779f222118e0493a6e5b.png)
+
 ## Available Parameters
 |Key|Type|Default|
 |--|--|--|
@@ -69,10 +73,6 @@ Explanation:
 | RDSParamGroup	 | AWS::RDS::DBParameterGroup	 |
 | RDSSecurityGroup	 | AWS::EC2::SecurityGroup	 |
 | S3Bucket	 |AWS::S3::Bucket	|
-
-## AWS Cloudformation Diagram
-
-![aws-cf-diagram](https://i.gyazo.com/eea0b51255f3779f222118e0493a6e5b.png)
 
 ## How to deploy this template
 - Clone this repo

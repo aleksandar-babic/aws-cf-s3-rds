@@ -27,9 +27,6 @@
 | RDSParamGroupFamily | String | MySQL5.6 |
 | RDSSGCidr | String | - |
 
-
-
-
 ## Outputs
 
 |Key|Description|
@@ -39,6 +36,24 @@
 | ApiGatewayInvokeURL | URL for API Gateway resource that will return RDS data |
 | RDSHostname | RDS DB internal hostname and port |
 
+# Resources created by this template
+
+|Name|Type|
+|--|--|
+| ApiGateway | AWS::ApiGateway::RestApi	 |
+| ApiGatewayDeployment	 | AWS::ApiGateway::Deployment	 |
+| ApiGatewayMethod | AWS::ApiGateway::Method	 |
+| BucketPolicy | AWS::S3::BucketPolicy	 |
+| CodeBuildProject | AWS::CodeBuild::Project	 |
+| CodeBuildServiceRole	 | AWS::IAM::Role	 |
+| LambdaApiGatewayInvoke | AWS::Lambda::Permission	 |
+| LambdaFunction | AWS::Lambda::Function	 |
+| LambdaIAMRole | AWS::IAM::Role	 |
+| LambdaLogGroup	 |  AWS::Logs::LogGroup	|
+| RDS |  AWS::RDS::DBInstance	|
+| RDSParamGroup	 | AWS::RDS::DBParameterGroup	 |
+| RDSSecurityGroup	 | AWS::EC2::SecurityGroup	 |
+| S3Bucket	 |AWS::S3::Bucket	|
 
 ## How to deploy this template
 - Clone this repo

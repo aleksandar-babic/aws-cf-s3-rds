@@ -11,7 +11,7 @@ Below are example (they are all working, check them out!) Outputs from this temp
 
 Explanation:
 
-- `S3BucketURL` and `S3BucketSecureURL` represent URLs(http and https) to VueJS App served from S3.
+- `S3BucketURL` and `S3BucketSecureURL` represent URLs(http and https) to VueJS App(built by AWS CodeBuild on every Github commit) served from S3.
 - `ApiGatewayInvokeURL` represents URL to Api Gateway Method that will Execute Python Lambda which fetches data from RDS.
 - `RDSHostname` represents connection string for RDS (RDS is not publicly available).
 

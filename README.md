@@ -15,6 +15,8 @@ Explanation:
 - `ApiGatewayInvokeURL` represents URL to Api Gateway Method that will Execute Python Lambda which fetches data from RDS.
 - `RDSHostname` represents connection string for RDS (RDS is not publicly available).
 
+> First request to Lambda might be slow due to Lambda Cold Start.
+
 ## AWS Cloudformation Diagram
 
 ![aws-cf-diagram](https://i.gyazo.com/eea0b51255f3779f222118e0493a6e5b.png)
